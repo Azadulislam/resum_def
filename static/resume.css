@@ -16,7 +16,7 @@
     .cv_item_title { display: flex; align-items: center; justify-content: space-between; }
     .cv_certification { display: flex; align-items: center; justify-content: flex-start; }
     .cv-certification-desc { margin-left: 0.5rem; font-size: 0.9rem;font-style: italic;}
-    .cv_tools-tech { display: flex; align-items: center; gap: 0.5rem; justify-content: flex-start; }
+    .cv_tools-tech { display: flex; align-items: center; gap: 0.5rem; justify-content: flex-start; margin-bottom: 5px;}
     /* .cv-tools-tech-desc { margin-left: 0.5rem; font-size: 0.9rem; color: #6b7280;font-style: italic;} */
     
     /* Page Break Classes */

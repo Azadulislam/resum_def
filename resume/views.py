@@ -62,7 +62,6 @@ def _get_profile_variation_sections(profile, variation):
     ).order_by("order")
     for section in related_sections:
         section_items = section.items.all()
-        print(section.description)
         if section.description != "" or section_items.exists():
             sections.append({"section": section, "items": section_items})
 

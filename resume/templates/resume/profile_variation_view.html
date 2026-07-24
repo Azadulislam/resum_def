@@ -32,14 +32,14 @@
     {% if selected_variation %}
         <div class="cv-section-list">
             {% for entry in sections %}
-                <section class="cv-section no-break-inside">
+                <section class="cv-section">
                     <h3>{{ entry.section.title }}</h3>
                     <hr style="margin: 0.4rem 0;">
                     <div class="cv-tools-tech-desc" style="text-align: justify;">{{ entry.section.description | safe  }}</div>
                     {% for item in entry.items %}
-                        <div class="cv-item no-break-inside">
+                        <div class=" no-break-inside">
                             {% if entry.section.key == 'certification' and item.title %}
-                            <div class="cv_certification">
+                            <div class="cv-item cv_certification">
                                 <h4>{{ item.title | safe  | default:""}}</h4>
                                 <p class="cv-certification-desc">{{ item.description | safe }}</p>
                             </div>
@@ -48,19 +48,52 @@
                                 <h4>{{ item.title  | default:""}}</h4>
                                 <p class="cv-tools-tech-desc">{{ item.description | safe }}</p>
                             </div>
+                            {% elif entry.section.key == 'experience' and item.title %}
+                            <div class="cv-item">
+                                <div class="cv_exop_title" style="display: flex; justify-content: space-between; gap: 5px;flex-wrap: wrap; margin-bottom: 5px">
+                                    <div style="display: flex; gap: 5px;">
+                                    <h4>{{ item.title | default:"" | safe}}{% if item.organization %},{% endif %} </h4>
+                                    <span style="font-style: italic;">{{ item.organization | default:"" }} </span>
+                                    </div>
+                                    {% if item.startdate or item.enddate or item.is_present %}
+                                        <div class="cv-dates">
+                                            {{ item.startdate|date:"M Y"|default:'' }}
+                                            {% if item.enddate or item.is_present %} - {% endif %}
+                                            {% if item.is_present and not item.enddate %}Present{% else %}{{ item.enddate|date:"M Y" }}{% endif %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <p>{{ item.description | default:'' | safe }}</p>
+                            </div>
+                            {% elif entry.section.key == 'projects' and item.title %}
+                            <div class="cv-item">
+                                <div class="cv_project_title" style="display: flex; gap: 5px;flex-wrap: wrap; margin-bottom: 5px">
+                                    <h4>{{ item.title | default:"" | safe}}</h4>
+                                    {% if item.link %}
+                                        <a href="{{ item.linik }}" class="cv-link">{{ item.link }}</a>
+                                    {% endif %}
+                                </div>
+                                <p>{{ item.description | default:'' | safe }}</p>
+                            </div>
                             {% elif entry.section.key == 'education' and item.title %}
-                            <div class="cv_tools-tech">
+                            <div class="cv-item cv_tools-tech">
                                 <h4>{{ item.title | default:""}}</h4>
                                 <p class="cv-tools-tech-desc">{{ item.description | safe }}</p>
                             </div>
                             {% else %}
-                            <div class="cv_item_title">
-                                <h4>{{ item.title | default:"" | safe}}</h4>
-                                {% if item.startdate or item.enddate %}
-                                    <div class="cv-dates">{{ item.startdate|default:'' }}{% if item.startdate and item.enddate %} - {% endif %}{{ item.enddate|default:'' }}</div>
-                                {% endif %}
+                            <div class="cv-item">
+                                <div class="cv_item_title">
+                                    <h4>{{ item.title | default:"" | safe}}</h4>
+                                    {% if item.startdate or item.enddate or item.is_present %}
+                                        <div class="cv-dates">
+                                            {{ item.startdate|date:"M Y"|default:'' }}
+                                            {% if item.enddate or item.is_present %} - {% endif %}
+                                            {% if item.is_present and not item.enddate %}Present{% else %}{{ item.enddate|date:"M Y" }}{% endif %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <p>{{ item.description | default:'' | safe }}</p>
                             </div>
-                            <p>{{ item.description | default:'' | safe }}</p>
                             {% endif %}
                         </div>
                     {% endfor %}
@@ -80,7 +113,7 @@
         const options = {
             margin: 0.4,
             filename: '{{ selected_variation.title }} "|" {{ profile.name }}-CV.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
+            image: { type: 'jpeg', quality: 0.85 },
             html2canvas: {scale: 2},
             jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
         };

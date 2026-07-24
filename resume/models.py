@@ -69,6 +69,8 @@ class SectionItem(models.Model):
     enddate = models.DateField(blank=True, null=True)
     variation = models.ManyToManyField("Variation", related_name="section_items")
     order = models.IntegerField(null=True, blank=True)
+    organization = models.CharField(max_length=255, null=True, blank=True)
+    is_present = models.BooleanField(default=False)
 
     class Meta:
         db_table = "section_item"

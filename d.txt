@@ -1,6 +1,13 @@
 User: azadulis_res
 Database: azadulis_resume
-dbp = D[4QJ2$X]#1(5n[E
+dbp = oMaD@E~jBDw,A;8K
 
 server user: azadulis
 pass: ad@islam
+
+'ENGINE': 'django.db.backends.mysql',
+'NAME': 'azadulis_resume',
+'USER': 'azadulis_res',
+'PASSWORD': 'oMaD@E~jBDw,A;8K',
+'HOST': 'localhost',  # Or your server's IP address
+'PORT': '3306',       # Default MySQL port

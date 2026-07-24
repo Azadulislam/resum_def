@@ -31,9 +31,11 @@ admin.site.register(Section)
 
 @admin.register(SectionItem)
 class SectionAdmin(admin.ModelAdmin):
-    list_display = ['section', 'title', 'order', 'description']
+    list_display = ['section', 'title', 'get_variations', 'order', 'description']
 
-
+    @admin.display(description="Variatios")
+    def get_variations(self, obj):
+        return ", ".join([v.title for v in obj.variation.all()]) or "None"
 
 admin.site.register(Variation)
 
