@@ -4,6 +4,7 @@ from django.db import models
 from django.urls import reverse
 from ckeditor.fields import RichTextField
 from django.utils.text import slugify
+from django.db.models import Max
 
 
 
@@ -67,6 +68,7 @@ class SectionItem(models.Model):
     startdate = models.DateField(blank=True, null=True)
     enddate = models.DateField(blank=True, null=True)
     variation = models.ManyToManyField("Variation", related_name="section_items")
+    order = models.IntegerField(null=True, blank=True)
 
     class Meta:
         db_table = "section_item"
@@ -78,6 +80,13 @@ class SectionItem(models.Model):
 
     def get_absolute_url(self):
         return reverse("section-item-detail", kwargs={"pk": self.pk})
+
+    def save(self, *args, **kwargs):
+        if self.order is None:
+            max_value = self.__class__.objects.filter(section__id=self.section.id).aggregate(Max('order'))['order__max']
+            self.order = (max_value or 0) + 1
+        super().save(*args, **kwargs)
+
 
 
 class Variation(models.Model):

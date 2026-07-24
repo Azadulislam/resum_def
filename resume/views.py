@@ -58,7 +58,7 @@ def _get_profile_variation_sections(profile, variation):
 
     section_ids = profile.section.values_list("id", flat=True)
     related_sections = Section.objects.filter(id__in=section_ids).prefetch_related(
-        Prefetch("items", queryset=SectionItem.objects.filter(variation=variation)),
+        Prefetch("items", queryset=SectionItem.objects.filter(variation=variation).order_by('order')),
     ).order_by("order")
     for section in related_sections:
         section_items = section.items.all()

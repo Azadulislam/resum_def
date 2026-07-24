@@ -31,7 +31,7 @@ admin.site.register(Section)
 
 @admin.register(SectionItem)
 class SectionAdmin(admin.ModelAdmin):
-    list_display = ['section', 'title', 'description']
+    list_display = ['section', 'title', 'order', 'description']
 
 
 
