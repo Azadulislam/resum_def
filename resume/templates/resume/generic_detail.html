@@ -1,0 +1,15 @@
+{% extends "resume/base.html" %}
+
+{% block title %}{{ object }}{% endblock %}
+
+{% block content %}
+    <h1>{{ object }}</h1>
+    <div class="actions">
+        <a href="{% url 'profile-list' %}" class="secondary">Back to list</a>
+        {% if object.get_absolute_url %}
+            <a href="{{ object.get_absolute_url }}update/">Edit</a>
+            <a href="{{ object.get_absolute_url }}delete/" class="secondary">Delete</a>
+        {% endif %}
+    </div>
+    <p>{{ object.description|default:"No description provided." }}</p>
+{% endblock %}

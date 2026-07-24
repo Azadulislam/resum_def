@@ -1,0 +1,59 @@
+{% extends "resume/base.html" %}
+
+{% block title %}{{ view.model.name }} List{% endblock %}
+
+{% block content %}
+    <h1>{{ view.model.name }} List</h1>
+    <div class="actions">
+        {% if model_name == 'Profile' %}
+            <a href="{% url 'profile-create' %}">Create Profile</a>
+        {% elif model_name == 'Section' %}
+            <a href="{% url 'section-create' %}">Create Section</a>
+        {% elif model_name == 'SectionItem' %}
+            <a href="{% url 'section-item-create' %}">Create Section Item</a>
+        {% elif model_name == 'Variation' %}
+            <a href="{% url 'variation-create' %}">Create Variation</a>
+        {% endif %}
+    </div>
+    {% if model_name == 'Profile' %}
+        <div class="profile-grid">
+            {% for object in object_list %}
+                <div class="profile-card">
+                    <h3>{{ object.name }} {{ object.variation.title }}</h3>
+                    <p><strong>{{ object.title }}</strong></p>
+                    <p>{{ object.description | safe }}</p>
+                    {% for variation in object.variation.all %}
+                    <div class="card-actions">
+                        <a href="{% url 'profile-variation-selected' object.id variation.id %}">{{ variation.title }}</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% empty %}
+                <p>No profiles yet.</p>
+            {% endfor %}
+        </div>
+
+    {% else %}
+        <ul>
+            {% for object in object_list %}
+                <li>
+                    <a href="{{ object.get_absolute_url }}">{{ object }}</a>
+                </li>
+            {% empty %}
+                <li>No records yet.</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if model_name == 'Profile' %}
+    <style>
+        .profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+        .profile-card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem; background: #fafafa; }
+        .card-actions { margin-top: 0.8rem; }
+        .card-actions a, .card-actions button { display: inline-block; margin-right: 0.5rem; padding: 0.5rem 0.8rem; background: #2563eb; color: white; text-decoration: none; border: none; border-radius: 4px; cursor: pointer; }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 999; }
+        .modal-content { background: white; padding: 1.5rem; border-radius: 8px; min-width: 300px; position: relative; }
+        .close { position: absolute; top: 0.5rem; right: 0.8rem; cursor: pointer; font-size: 1.3rem; }
+    </style>
+    {% endif %}
+{% endblock %}

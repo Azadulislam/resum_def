@@ -1,0 +1,90 @@
+{% extends "resume/base.html" %}
+{% load static %}
+
+{% block title %}{{ profile.name }} - {{ selected_variation.title|default:'Resume' }}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'resume.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<div class="cv-actions">
+    {% if selected_variation %}
+        {# <a class="print-btn" href="{% url 'profile-variation-pdf' pk=profile.pk %}?variation={{ selected_variation.id }}" target="_blank" rel="noopener noreferrer">Print PDF</a> #}
+        <button class="print-btn" onclick="downloadCVAsPDF()">Download PDF</button>
+    {% endif %}
+</div>
+
+<div style="width: 100%; display: flex; justify-content: center;">
+<div class="cv-shell" id="cv-shell" style="width: 700px; color: black;box-sizing: border-box;">
+    <div class="cv-header">
+        <h1 style="text-align: center;">{{ profile.name }}</h1>
+        <div class="cv-links" style="text-align: center; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.3rem 0.5rem; margin-bottom: 0.5rem; max-width: 80%; margin: 0 auto;">
+            {% if profile.location %}<span><i class="fas fa-map-marker-alt"></i> {{ profile.location }}</span>{% endif %}
+            {% if profile.phone %}<span><i class="fas fa-phone"></i> {{ profile.phone }}</span>{% endif %}
+            {% if profile.email %}<span><a href="mailto:{{ profile.email }}"><i class="fas fa-envelope"></i> {{ profile.email }}</a></span>{% endif %}
+            {% if profile.github %}<a href="{{ profile.github }}" target="_blank"><i class="fab fa-github"></i> {{ profile.github }}</a>{% endif %}
+            {% if profile.linkedin %}<a href="{{ profile.linkedin }}" target="_blank"><i class="fab fa-linkedin"></i> {{ profile.linkedin }}</a>{% endif %}
+            {% if profile.portfolio %}<a href="{{ profile.portfolio }}" target="_blank"><i class="fas fa-briefcase"></i> {{ profile.portfolio }}</a>{% endif %}
+            {% if profile.remote_ready %}<span style="font-weight: bold;"><i class="fas fa-laptop-code"></i> Remote Ready</span>{% endif %}
+        </div>
+        <!-- <div style="text-align: justify;">{{ profile.description | safe }}</div> -->
+    </div>
+
+    {% if selected_variation %}
+        <div class="cv-section-list">
+            {% for entry in sections %}
+                <section class="cv-section no-break-inside">
+                    <h3>{{ entry.section.title }}</h3>
+                    <hr style="margin: 0.4rem 0;">
+                    <div class="cv-tools-tech-desc" style="text-align: justify;">{{ entry.section.description | safe  }}</div>
+                    {% for item in entry.items %}
+                        <div class="cv-item no-break-inside">
+                            {% if entry.section.key == 'certification' and item.title %}
+                            <div class="cv_certification">
+                                <h4>{{ item.title | safe  | default:""}}</h4>
+                                <p class="cv-certification-desc">{{ item.description | safe }}</p>
+                            </div>
+                            {% elif entry.section.title.lower == 'tools and technology' and item.title %}
+                            <div class="cv_tools-tech">
+                                <h4>{{ item.title  | default:""}}</h4>
+                                <p class="cv-tools-tech-desc">{{ item.description | safe }}</p>
+                            </div>
+                            {% elif entry.section.key == 'education' and item.title %}
+                            <div class="cv_tools-tech">
+                                <h4>{{ item.title | default:""}}</h4>
+                                <p class="cv-tools-tech-desc">{{ item.description | safe }}</p>
+                            </div>
+                            {% else %}
+                            <div class="cv_item_title">
+                                <h4>{{ item.title | default:"" | safe}}</h4>
+                                {% if item.startdate or item.enddate %}
+                                    <div class="cv-dates">{{ item.startdate|default:'' }}{% if item.startdate and item.enddate %} - {% endif %}{{ item.enddate|default:'' }}</div>
+                                {% endif %}
+                            </div>
+                            <p>{{ item.description | default:'' | safe }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </section>
+            {% empty %}
+                <p>No matching content for this variation yet.</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+    function downloadCVAsPDF() {
+        const element = document.getElementById('cv-shell');
+        const options = {
+            margin: 0.4,
+            filename: '{{ selected_variation.title }} "|" {{ profile.name }}-CV.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: {scale: 2},
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(options).from(element).save();
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,93 @@
+to manage my resume different sections different projects different experience profile summery technical highlights
+
+data base design:
+
+1. resume
+	title
+	description
+4. resume_items
+	section_id
+	section_item_id
+
+2. section_type
+	title
+
+3. section_item
+	title
+	description
+	version Enum(all, backend, full-stack python, full-stack laravel, full-stack) for which section I should use this
+	
+
+variation 
+
+Django Developer 
+Laravel Developer
+Backend Developer
+
+Porfile
+Azadul Islam
+Backend Developer
+PHP Laravel developer with 4.5+ years of professional experience building REST APIs, multi-tenant applications, payment
+integrations, and database-driven systems. Experienced in PHP, Laravel, Python, Django, Django REST Framework,
+PostgreSQL, MySQL, authentication systems, and performance optimization. Passionate about designing scalable backend
+architectures and delivering reliable production-ready applications.
+variation -> Laravel Developer
+linkeding: https://www.linkedin.com/in/azadul-islam-ai/ 
+github: https://github.com/Azadulislam
+portfolio: https://azadulislam.top/
+
+-------------------
+Azadul Islam
+Backend Developer
+Django Backend Developer with 2.5+ years of professional experience building REST APIs, multi-tenant applications,
+payment integrations, and database-driven systems. Experienced in Python, Django, Django REST Framework, PHP, Laravel,
+PostgreSQL, MySQL, authentication systems, and performance optimization. Passionate about designing scalable backend
+architectures and delivering reliable production-ready applications.
+variation -> Laravel Developer
+linkeding: https://www.linkedin.com/in/azadul-islam-ai/ 
+github: https://github.com/Azadulislam
+portfolio: https://azadulislam.top/
+
+
+section
+
+Techical highlights
+Experience 
+Projects
+Tools and Technology
+Certification
+Education
+
+Section items 
+
+- Techical highlights
+Reduced database query response time from 13s to 2s on 200K+ records.
+Integrated Stripe recurring subscriptions with automated billing workflows.
+Built scalable REST APIs using Django REST Framework and Laravel.
+Implemented Progressive Web App (PWA) offline support using Service Workers to enhance user experience
+Developed real-time chat functionality using WebSockets and Laravel Reverb.
+Automated recurring tasks using Laravel Scheduler.
+Implemented PWA offline support using Service Workers.
+Designed role-based access control (RBAC) and multi-tenant architectures.
+
+
+- Experience
+title - Full Stack PHP Software Developer, Fitlynk
+description - 
+Developed and maintained REST APIs powering e-commerce and booking platforms.
+Reduced database response time from 13s to 2s through query optimization, indexing across 200K+ records.
+Integrated Stripe subscription billing with secure webhook processing and automated payment workflows.
+Designed backend business logic for booking workflows and user account systems.
+
+- Tools and Technology
+title : Backend - description: Python, Django, DRF, FastApi, PHP, Laravel 
+title: Database - Description: MySQL, Redis, PostGreSql
+title: Frontend - Description:Vue.js, JavaScript, TailwindCSS
+title: Tools - Description: Git, Postman, DigitalOcean, WebSockets
+
+- Certifications
+LEDP - Learning and earning developemrnt project - ICT
+
+
+- Education
+Diploma in Computer Technology, Rajshahi Polytechnic institute 2018 - 2023
