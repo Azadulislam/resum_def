@@ -1,0 +1,644 @@
+{% extends "resume/base.html" %}
+{% load static %}
+
+{% block title %}{{ profile.name }} - Edit {{ selected_variation.title|default:'Resume' }}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'resume.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+<style>
+    .edit-section-icon {
+        cursor: pointer;
+        color: #4f46e5;
+        margin-left: 10px;
+        font-size: 0.75em;
+        transition: transform 0.15s ease;
+        vertical-align: middle;
+    }
+    .edit-section-icon:hover {
+        transform: scale(1.15);
+        color: #4338ca;
+    }
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        backdrop-filter: blur(2px);
+    }
+    .modal-overlay.active {
+        display: flex;
+    }
+    .modal-container {
+        background: white;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+    .modal-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .modal-header h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #111827;
+    }
+    .modal-close-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1.25rem;
+        color: #6b7280;
+        padding: 4px 8px;
+        border-radius: 6px;
+        transition: all 0.15s ease;
+    }
+    .modal-close-btn:hover {
+        background: #f3f4f6;
+        color: #111827;
+    }
+    .modal-body {
+        padding: 20px 24px;
+        overflow-y: auto;
+        flex: 1;
+    }
+    .modal-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        margin-bottom: 10px;
+        transition: all 0.15s ease;
+    }
+    .modal-item:hover {
+        border-color: #c7d2fe;
+        background: #f9fafb;
+    }
+    .modal-item input[type="checkbox"] {
+        margin-top: 3px;
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: #4f46e5;
+        flex-shrink: 0;
+    }
+    .modal-item-content {
+        flex: 1;
+        min-width: 0;
+    }
+    .modal-item-title {
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 2px;
+        word-break: break-word;
+    }
+    .modal-item-desc {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin: 0;
+        max-height: 60px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+    .modal-item-meta {
+        font-size: 0.75rem;
+        color: #9ca3af;
+        margin-top: 4px;
+    }
+    .modal-footer {
+        padding: 16px 24px;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+    }
+    .modal-select-actions {
+        display: flex;
+        gap: 8px;
+    }
+    .modal-btn {
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        border: 1px solid #d1d5db;
+        background: white;
+        color: #374151;
+        transition: all 0.15s ease;
+    }
+    .modal-btn:hover {
+        background: #f9fafb;
+    }
+    .modal-btn-primary {
+        background: #4f46e5;
+        border-color: #4f46e5;
+        color: white;
+    }
+    .modal-btn-primary:hover {
+        background: #4338ca;
+    }
+    .modal-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    .save-status {
+        font-size: 0.85rem;
+        margin-right: auto;
+    }
+    .save-status.success { color: #059669; }
+    .save-status.error { color: #dc2626; }
+    .back-view-btn {
+        background: #6b7280;
+    }
+    .back-view-btn:hover {
+        background: #4b5563;
+    }
+</style>
+
+<div class="cv-actions" style="justify-content: flex-start;">
+    {% if selected_variation %}
+        <a class="print-btn back-view-btn" href="{% if selected_variation %}{% url 'profile-variation-selected' pk=profile.pk variation_id=selected_variation.pk %}{% else %}{% url 'profile-variation' pk=profile.pk %}{% endif %}" style="margin-right: 8px;">
+            <i class="fas fa-arrow-left"></i> Back to View
+        </a>
+        <button class="print-btn" onclick="downloadCVAsPDF()">
+            <i class="fas fa-file-pdf"></i> Download PDF
+        </button>
+        <label class="pdf-preview-toggle" title="Toggle exact A4 page guides (matches PDF download layout)." style="margin-left: 8px;">
+            <input type="checkbox" id="pdfPreviewToggle" onchange="togglePDFPreview(this.checked)" style="margin: 0;">
+            <i class="fas fa-ruler-combined"></i>
+            <span>Show PDF Page Guides</span>
+        </label>
+    {% endif %}
+</div>
+
+<div style="width: 100%; display: flex; justify-content: center;">
+    <div class="cv-outer-stage" style="width: 100%; display: flex; justify-content: center;">
+        <div class="pdf-preview-stage" id="pdfPreviewStage" style="width: 100%;">
+            <div class="a4-page-stack" id="a4PageStack"></div>
+            <div class="cv-shell" id="cv-shell" style="width: 7.47in; color: black; box-sizing: border-box;">
+    <div class="cv-header">
+        <h1 style="text-align: center;">{{ profile.name }}</h1>
+        <div class="cv-links" style="text-align: center; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.3rem 0.5rem; margin-bottom: 0.5rem; max-width: 80%; margin: 0 auto;">
+            {% if profile.location %}<span><i class="fas fa-map-marker-alt"></i> {{ profile.location }}</span>{% endif %}
+            {% if profile.phone %}<span><i class="fas fa-phone"></i> {{ profile.phone }}</span>{% endif %}
+            {% if profile.email %}<span><a href="mailto:{{ profile.email }}"><i class="fas fa-envelope"></i> {{ profile.email }}</a></span>{% endif %}
+            {% if profile.github %}<a href="{{ profile.github }}" target="_blank"><i class="fab fa-github"></i> {{ profile.github }}</a>{% endif %}
+            {% if profile.linkedin %}<a href="{{ profile.linkedin }}" target="_blank"><i class="fab fa-linkedin"></i> {{ profile.linkedin }}</a>{% endif %}
+            {% if profile.portfolio %}<a href="{{ profile.portfolio }}" target="_blank"><i class="fas fa-briefcase"></i> {{ profile.portfolio }}</a>{% endif %}
+            {% if profile.remote_ready %}<span style="font-weight: bold;"><i class="fas fa-laptop-code"></i> Remote Ready</span>{% endif %}
+        </div>
+    </div>
+
+    {% if selected_variation %}
+        <div class="cv-section-list">
+            {% for entry in sections %}
+                <section class="cv-section" data-section-id="{{ entry.section.id }}">
+                    <div class="no-break-iside" style="display: flex; align-items: center; flex-wrap: wrap;">
+                        <h3 style="margin: 0;">{{ entry.section.title }}</h3>
+                        <i class="fas fa-edit edit-section-icon"
+                           onclick="openSectionModal('{{ entry.section.id }}', '{{ entry.section.title|escapejs }}')"
+                           title="Edit items for this section"></i>
+                        <span style="margin-left: auto; font-size: 0.75rem; color: #6b7280;">
+                            {{ entry.items|length }} of {{ entry.all_items|length }} selected
+                        </span>
+                    </div>
+                    <hr style="margin: 0.4rem 0;">
+                    <div class="cv-tools-tech-desc" style="text-align: justify;">{{ entry.section.description | safe  }}</div>
+                    {% for item in entry.items %}
+                        <div class=" no-break-inside">
+                            {% if entry.section.key == 'certification' and item.title %}
+                            <div class="cv-item cv_certification">
+                                <h4>{{ item.title | safe  | default:""}}</h4>
+                                <p class="cv-certification-desc">{{ item.description | safe }}</p>
+                            </div>
+                            {% elif entry.section.title.lower == 'tools and technology' and item.title %}
+                            <div class="cv_tools-tech">
+                                <h4>{{ item.title  | default:""}}</h4>
+                                <p class="cv-tools-tech-desc">{{ item.description | safe }}</p>
+                            </div>
+                            {% elif entry.section.key == 'experience' and item.title %}
+                            <div class="cv-item">
+                                <div class="cv_exop_title" style="display: flex; justify-content: space-between; gap: 5px;flex-wrap: wrap; margin-bottom: 5px">
+                                    <div style="display: flex; gap: 5px;">
+                                    <h4>{{ item.title | default:"" | safe}}{% if item.organization %},{% endif %} </h4>
+                                    <span style="font-style: italic;">{{ item.organization | default:"" }} </span>
+                                    </div>
+                                    {% if item.startdate or item.enddate or item.is_present %}
+                                        <div class="cv-dates">
+                                            {{ item.startdate|date:"M Y"|default:'' }}
+                                            {% if item.enddate or item.is_present %} - {% endif %}
+                                            {% if item.is_present and not item.enddate %}Present{% else %}{{ item.enddate|date:"M Y" }}{% endif %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <p>{{ item.description | default:'' | safe }}</p>
+                            </div>
+                            {% elif entry.section.key == 'projects' and item.title %}
+                            <div class="cv-item">
+                                <div class="cv_project_title" style="display: flex; gap: 5px;flex-wrap: wrap; margin-bottom: 5px">
+                                    <h4>{{ item.title | default:"" | safe}}</h4>
+                                    {% if item.link %}
+                                        <a href="{{ item.linik }}" class="cv-link">{{ item.link }}</a>
+                                    {% endif %}
+                                </div>
+                                <p>{{ item.description | default:'' | safe }}</p>
+                            </div>
+                            {% elif entry.section.key == 'education' and item.title %}
+                            <div class="cv-item cv_tools-tech">
+                                <h4>{{ item.title | default:""}}</h4>
+                                <p class="cv-tools-tech-desc">{{ item.description | safe }}</p>
+                            </div>
+                            {% else %}
+                            <div class="cv-item">
+                                <div class="cv_item_title">
+                                    <h4>{{ item.title | default:"" | safe}}</h4>
+                                    {% if item.startdate or item.enddate or item.is_present %}
+                                        <div class="cv-dates">
+                                            {{ item.startdate|date:"M Y"|default:'' }}
+                                            {% if item.enddate or item.is_present %} - {% endif %}
+                                            {% if item.is_present and not item.enddate %}Present{% else %}{{ item.enddate|date:"M Y" }}{% endif %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <p>{{ item.description | default:'' | safe }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    {% empty %}
+                        <p style="color: #9ca3af; font-style: italic;">No items selected yet. Click the edit icon to add items.</p>
+                    {% endfor %}
+                </section>
+            {% empty %}
+                <p>No matching content for this variation yet.</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+        </div>
+    </div>
+</div>
+
+<div id="sectionModal" class="modal-overlay" onclick="handleOverlayClick(event)">
+    <div class="modal-container" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h3 id="modalTitle">Edit Section Items</h3>
+            <button class="modal-close-btn" onclick="closeSectionModal()" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body" id="modalBody">
+        </div>
+        <div class="modal-footer">
+            <span id="saveStatus" class="save-status"></span>
+            <div class="modal-select-actions">
+                <button class="modal-btn" onclick="selectAllItems(true)">Select All</button>
+                <button class="modal-btn" onclick="selectAllItems(false)">Deselect All</button>
+            </div>
+            <button class="modal-btn modal-btn-primary" id="saveBtn" onclick="saveSectionItems()">
+                <i class="fas fa-save"></i> Save Items
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+    const PDF_CONFIG = {
+        marginInches: 0.4,
+        a4WidthInches: 8.27,
+        a4HeightInches: 11.69,
+        get contentHeightInches() { return this.a4HeightInches - (2 * this.marginInches); },
+        get contentWidthInches() { return this.a4WidthInches - (2 * this.marginInches); },
+        dpi: 96
+    };
+
+    function inToPx(inches) { return inches * PDF_CONFIG.dpi; }
+
+    function togglePDFPreview(show) {
+        const body = document.body;
+        const stack = document.getElementById('a4PageStack');
+        const cvShell = document.getElementById('cv-shell');
+        if (show) {
+            body.classList.add('pdf-preview-mode');
+            renderPageGuides();
+        } else {
+            body.classList.remove('pdf-preview-mode');
+            clearPageGuides();
+        }
+    }
+
+    function buildA4PageHTML(pageNum) {
+        return `
+            <div class="a4-page-card" data-page="${pageNum}">
+                <div class="a4-page-head">
+                    <span class="pg-num">A4 Page ${pageNum}</span>
+                    <span class="pg-size">${PDF_CONFIG.a4WidthInches}" × ${PDF_CONFIG.a4HeightInches}" · content ${PDF_CONFIG.contentWidthInches.toFixed(2)}" × ${PDF_CONFIG.contentHeightInches.toFixed(2)}"</span>
+                </div>
+                <span class="a4-margin-tag top">0.4" top margin</span>
+                <span class="a4-margin-tag bottom">0.4" bottom margin</span>
+                <span class="a4-margin-tag left">0.4" left</span>
+                <span class="a4-margin-tag right">0.4" right</span>
+            </div>
+        `;
+    }
+
+    function renderPageGuides() {
+        clearPageGuides();
+        const cvShell = document.getElementById('cv-shell');
+        const stack = document.getElementById('a4PageStack');
+        const stage = document.getElementById('pdfPreviewStage');
+        const contentHeightPx = cvShell.offsetHeight;
+        const pageContentHeightPx = inToPx(PDF_CONFIG.contentHeightInches);
+        const a4HeightPx = inToPx(PDF_CONFIG.a4HeightInches);
+        const marginPx = inToPx(PDF_CONFIG.marginInches);
+        const totalPages = Math.max(1, Math.ceil(contentHeightPx / pageContentHeightPx));
+
+        // Layout geometry:
+        //   Stage has padding-top/bottom = marginPx (0.4in each).
+        //   Page-stack is absolute, top:0 = stage padding-top edge.
+        //   Page cards are inside page-stack.
+        //   Cv-shell top border sits at stage padding-top edge = page-stack top=0.
+        //   Cv-shell content height per PDF page == pageContentHeightPx.
+        //   Card (N)'s dashed inner rect (inset marginPx top/bottom) must align
+        //   with cv-shell rows [N*pageContentHeightPx .. (N+1)*pageContentHeightPx).
+        //   => card N top relative to stack = N*pageContentHeightPx - marginPx.
+        //   (Cards are NOT spaced by a4Height — their top/bottom 0.4in margin
+        //    areas naturally overlap onto the previous/next card's margin area
+        //    because the usable content is 0.8in shorter than the full card.)
+        for (let p = 0; p < totalPages; p++) {
+            const card = document.createElement('div');
+            card.innerHTML = buildA4PageHTML(p + 1).trim();
+            const cardEl = card.firstElementChild;
+            const cardTopPx = p * pageContentHeightPx - marginPx;
+            cardEl.style.top = cardTopPx + 'px';
+            stack.appendChild(cardEl);
+        }
+
+        // Set page-stack height: from card-0 top to last-card bottom.
+        const lastCardTopPx = (totalPages - 1) * pageContentHeightPx - marginPx;
+        const stackContentH = lastCardTopPx + a4HeightPx;
+        stack.style.height = stackContentH + 'px';
+        stack.style.minHeight = '100%';
+
+        // Stage height: page-stack top (0) + stack height. Because stage already
+        // has padding-top/bottom, but stack's top is at padding-top edge, the
+        // content + stack will push stage's content box to at least
+        // `max(cv-shell natural height, stackContentH)`. No extra work needed,
+        // but we explicitly force cv-shell's layout to include enough extra
+        // bottom space so the last dashed line appears inside the last page card.
+        // It's already there via natural flow.
+
+        // Page-break lines inside cv-shell. These mark where content transitions
+        // between page N and page N+1. Coordinates are relative to cv-shell
+        // (which has position: relative in preview mode). Line after page 1 is
+        // drawn at y = 1*pageContentHeightPx (the bottom line of page-1 content
+        // area = dashed line on card 0 just above card 1 area).
+        for (let pi = 1; pi < totalPages; pi++) {
+            const line = document.createElement('div');
+            line.className = 'pdf-page-break';
+            line.setAttribute('data-label', `▼ END OF PAGE ${pi} ▼`);
+            line.style.top = (pi * pageContentHeightPx) + 'px';
+            cvShell.appendChild(line);
+        }
+
+        // Last page: visualize empty space below last content's end up to the
+        // last card's content-area bottom (the striped zone is 0.4in before the
+        // actual card bottom — it's inside the dashed rect, matching the user's
+        // PDF usable bottom limit).
+        const lastPageStart = (totalPages - 1) * pageContentHeightPx;
+        const lastCardContentBottom = lastPageStart + pageContentHeightPx;
+        if (contentHeightPx < lastCardContentBottom - 1) {
+            const ghost = document.createElement('div');
+            ghost.className = 'pdf-content-end-zone';
+            ghost.style.top = contentHeightPx + 'px';
+            ghost.style.height = (lastCardContentBottom - contentHeightPx) + 'px';
+            cvShell.appendChild(ghost);
+        }
+    }
+
+    function clearPageGuides() {
+        const cvShell = document.getElementById('cv-shell');
+        cvShell.querySelectorAll('.pdf-page-break, .pdf-content-end-zone').forEach(el => el.remove());
+        const stack = document.getElementById('a4PageStack');
+        stack.innerHTML = '';
+        stack.style.height = '';
+        stack.style.minHeight = '';
+    }
+
+    function downloadCVAsPDF() {
+        const wasPreview = document.body.classList.contains('pdf-preview-mode');
+        if (wasPreview) {
+            togglePDFPreview(false);
+            setTimeout(() => runPDFExport(wasPreview), 80);
+        } else {
+            runPDFExport(wasPreview);
+        }
+    }
+
+    function runPDFExport(restorePreview) {
+        const element = document.getElementById('cv-shell');
+        const options = {
+            margin: 0.4,
+            filename: '{{ selected_variation.title }} "|" {{ profile.name }}-CV.pdf',
+            image: { type: 'jpeg', quality: 0.85 },
+            html2canvas: {scale: 2},
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(options).from(element).save().then(() => {
+            if (restorePreview) {
+                setTimeout(() => {
+                    const cb = document.getElementById('pdfPreviewToggle');
+                    if (cb) { cb.checked = true; togglePDFPreview(true); }
+                }, 500);
+            }
+        });
+    }
+
+    // ---- Existing edit-modal + save logic ----
+    const sectionsData = JSON.parse("{{ sections_json|escapejs }}");
+
+    let currentSectionId = null;
+
+    function openSectionModal(sectionId, sectionTitle) {
+        currentSectionId = sectionId;
+        const data = sectionsData[sectionId];
+        if (!data) return;
+
+        document.getElementById('modalTitle').textContent = 'Edit: ' + sectionTitle;
+        renderModalItems(data);
+        document.getElementById('saveStatus').textContent = '';
+        document.getElementById('sectionModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeSectionModal() {
+        document.getElementById('sectionModal').classList.remove('active');
+        document.body.style.overflow = '';
+        currentSectionId = null;
+    }
+
+    function handleOverlayClick(event) {
+        if (event.target.id === 'sectionModal') {
+            closeSectionModal();
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function renderModalItems(data) {
+        const body = document.getElementById('modalBody');
+        if (!data.all_items || data.all_items.length === 0) {
+            body.innerHTML = '<p style="color: #6b7280; text-align: center; padding: 20px;">No items available for this section.</p>';
+            return;
+        }
+
+        let html = '';
+        const selectedSet = new Set(data.selected_ids);
+
+        data.all_items.forEach((item, idx) => {
+            const checked = selectedSet.has(item.id) ? 'checked' : '';
+            const metaParts = [];
+            if (item.organization) metaParts.push(escapeHtml(item.organization));
+            if (item.date_text) metaParts.push(item.date_text);
+            const metaText = metaParts.join(' · ');
+
+            html += `
+                <label class="modal-item">
+                    <input type="checkbox" class="item-checkbox" value="${item.id}" ${checked}>
+                    <div class="modal-item-content">
+                        <div class="modal-item-title">${escapeHtml(item.title) || '(No title)'}</div>
+                        ${item.description ? `<p class="modal-item-desc">${escapeHtml(item.description)}</p>` : ''}
+                        ${metaText ? `<div class="modal-item-meta">${metaText}</div>` : ''}
+                    </div>
+                </label>
+            `;
+        });
+        body.innerHTML = html;
+    }
+
+    function selectAllItems(select) {
+        const checkboxes = document.querySelectorAll('#modalBody .item-checkbox');
+        checkboxes.forEach(cb => cb.checked = select);
+    }
+
+    async function saveSectionItems() {
+        if (!currentSectionId) return;
+
+        const checkboxes = document.querySelectorAll('#modalBody .item-checkbox');
+        const selectedItems = [];
+        checkboxes.forEach(cb => {
+            if (cb.checked) selectedItems.push(cb.value);
+        });
+
+        const saveBtn = document.getElementById('saveBtn');
+        const saveStatus = document.getElementById('saveStatus');
+        const profilePk = "{{ profile.pk }}";
+        const variationPk = "{{ selected_variation.pk }}";
+        const saveUrl = `/profiles/${profilePk}/variation/${variationPk}/section/${currentSectionId}/save-items/`;
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        saveStatus.textContent = '';
+        saveStatus.className = 'save-status';
+
+        try {
+            const response = await fetch(saveUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ selected_items: selectedItems })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                saveStatus.textContent = 'Saved successfully!';
+                saveStatus.classList.add('success');
+                sectionsData[currentSectionId].selected_ids = selectedItems;
+                setTimeout(() => {
+                    closeSectionModal();
+                    window.location.reload();
+                }, 500);
+            } else {
+                saveStatus.textContent = 'Error: ' + (result.error || 'Failed to save');
+                saveStatus.classList.add('error');
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Items';
+            }
+        } catch (err) {
+            saveStatus.textContent = 'Network error. Please try again.';
+            saveStatus.classList.add('error');
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Items';
+        }
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeSectionModal();
+        }
+    });
+
+    // Re-apply PDF preview (if user previously enabled it) after page reloads,
+    // e.g. following a "Save items" that refreshes.
+    document.addEventListener('DOMContentLoaded', function () {
+        try {
+            const enabled = sessionStorage.getItem('edit_pdf_preview_enabled') === '1';
+            const cb = document.getElementById('pdfPreviewToggle');
+            if (cb) {
+                if (enabled) {
+                    cb.checked = true;
+                    togglePDFPreview(true);
+                }
+                cb.addEventListener('change', function () {
+                    sessionStorage.setItem('edit_pdf_preview_enabled', cb.checked ? '1' : '0');
+                });
+            }
+        } catch (_) {}
+    });
+</script>
+{% endblock %}

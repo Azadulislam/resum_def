@@ -49,11 +49,22 @@ class Section(models.Model):
 
     def __str__(self):
         return self.title
+
     def save(self, *args, **kwargs):
+        is_new = self._state.adding
         if not self.key and self.title:
             self.key = slugify(self.title)
 
         super(Section, self).save(*args, **kwargs)
+
+        # Auto-assign any newly created Section to every existing Profile
+        # so it is immediately selectable in profile variation views.
+        if is_new:
+            for profile in Profile.objects.prefetch_related('section').all():
+                try:
+                    profile.section.add(self)
+                except Exception:
+                    pass
 
     def get_absolute_url(self):
         return reverse("section-detail", kwargs={"pk": self.pk})
@@ -87,6 +98,9 @@ class SectionItem(models.Model):
         if self.order is None:
             max_value = self.__class__.objects.filter(section__id=self.section.id).aggregate(Max('order'))['order__max']
             self.order = (max_value or 0) + 1
+        self.is_present = bool(self.is_present)
+        if self.is_present:
+            self.enddate = None
         super().save(*args, **kwargs)
 
 
@@ -103,6 +117,19 @@ class Variation(models.Model):
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        is_new = self._state.adding
+        super(Variation, self).save(*args, **kwargs)
+
+        # Auto-assign any newly created Variation to every existing Profile
+        # so it is immediately selectable as a profile resume variation.
+        if is_new:
+            for profile in Profile.objects.prefetch_related('variation').all():
+                try:
+                    profile.variation.add(self)
+                except Exception:
+                    pass
 
     def get_absolute_url(self):
         return reverse("variation-detail", kwargs={"pk": self.pk})

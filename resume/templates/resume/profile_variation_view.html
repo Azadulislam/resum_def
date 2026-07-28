@@ -13,6 +13,9 @@
     {% if selected_variation %}
         {# <a class="print-btn" href="{% url 'profile-variation-pdf' pk=profile.pk %}?variation={{ selected_variation.id }}" target="_blank" rel="noopener noreferrer">Print PDF</a> #}
         <button class="print-btn" onclick="downloadCVAsPDF()">Download PDF</button>
+        <a class="print-btn edit-btn" href="{% if selected_variation %}{% url 'profile-variation-edit' pk=profile.pk variation_id=selected_variation.pk %}{% else %}{% url 'profile-variation-edit-no-id' pk=profile.pk %}{% endif %}" style="background: #4f46e5; margin-left: 8px;">
+            <i class="fas fa-edit"></i> Edit Variation
+        </a>
     {% endif %}
 </div>
 

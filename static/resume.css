@@ -1,8 +1,4 @@
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: "Roboto", sans-serif !important;
-      font-optical-sizing: auto;
-      font-weight: 400;
-      font-style: normal;
-      font-variation-settings:"wdth" 100;}
+* { margin: 0; padding: 0; box-sizing: border-box; }
     .cv-header {margin-bottom: 1rem; }
     .cv-header h1 { margin-bottom: 0.2rem; }
     .cv-header h2 { color: #4b5563; margin-top: 0; }
@@ -12,7 +8,7 @@
     .variation-form { margin-bottom: 0; }
     .variation-form select { padding: 0.5rem; min-width: 220px; }
     .print-btn { display: inline-block; padding: 0.6rem 0.9rem; background: #1f2937; color: white; text-decoration: none; border-radius: 4px; border: none; cursor: pointer; font-size: inherit; }
-    .cv-section { margin-bottom: 0.8rem; }
+    .cv-section { margin-bottom: 0.2rem; }
     .cv-section h3 { letter-spacing: 0.04em;}
     .cv-item { margin-bottom: 0.7rem; }
     /* .cv-item h4 { margin-bottom: 0.2rem; } */
@@ -27,11 +23,203 @@
     .page-break-before { page-break-before: always; }
     .page-break-after { page-break-after: always; }
     .no-break-inside { page-break-inside: avoid; }
+    .cv-section-list{font-family: "Roboto", sans-serif !important;
+      font-optical-sizing: auto;
+      font-style: normal;
+      font-variation-settings:"wdth" 100;}
 
-    .roboto {
-  font-family: "Roboto", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 400;
-  font-style: normal;
-  font-variation-settings:
-    "wdth" }
+/* .fas, .far, .fab { font-family: "Font Awesome 6 Free", sans-serif !important; } */
+
+/* ===== PDF Preview Visualization ===== */
+.pdf-preview-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+    padding: 0.5rem 0.75rem;
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: #4338ca;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+}
+.pdf-preview-toggle:hover {
+    background: #e0e7ff;
+    border-color: #a5b4fc;
+}
+.pdf-preview-toggle input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #4f46e5;
+    cursor: pointer;
+}
+
+.pdf-preview-mode .cv-outer-stage {
+    background: #f3f4f6;
+    padding: 2.5rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.pdf-preview-stage {
+    position: relative;
+    margin: 0 auto;
+    /* In preview mode, cards 0/N extend 0.4in above/below the continuous content.
+       Pad the stage by that amount so the card shadows are fully visible. */
+    padding-top: 0.4in;
+    padding-bottom: 0.4in;
+    /* Block margin collapse between stage and cv-shell so header h1's margin
+       doesn't shift cv-shell down off the first card's dashed border. */
+    display: flow-root;
+}
+
+/* Shared sizing: the stage is exactly A4 wide so backgrounds + content line up. */
+.pdf-preview-mode .pdf-preview-stage {
+    width: 8.27in;
+}
+
+.a4-page-stack {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.a4-page-card {
+    position: absolute;
+    left: 0;
+    width: 8.27in;
+    height: 11.69in;
+    background: white;
+    border: 1.5px solid #9ca3af;
+    border-radius: 2px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.10);
+    box-sizing: border-box;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.a4-page-card::before {
+    content: "";
+    position: absolute;
+    top: 0.4in;
+    right: 0.4in;
+    bottom: 0.4in;
+    left: 0.4in;
+    border: 1.5px dashed #6366f1;
+    border-radius: 1px;
+    background: linear-gradient(180deg, rgba(99,102,241,0.035) 0%, rgba(99,102,241,0) 100%);
+    pointer-events: none;
+}
+
+.a4-page-head {
+    position: absolute;
+    top: -1.85rem;
+    left: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    font-family: "Inter", system-ui, sans-serif;
+    white-space: nowrap;
+}
+.a4-page-head .pg-num {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: #374151;
+    letter-spacing: 0.02em;
+}
+.a4-page-head .pg-size {
+    font-size: 0.7rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.a4-margin-tag {
+    position: absolute;
+    font-size: 0.65rem;
+    color: #4f46e5;
+    background: white;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    border: 1px solid #c7d2fe;
+    font-family: "Inter", system-ui, sans-serif;
+    font-weight: 600;
+    z-index: 2;
+}
+.a4-margin-tag.top    { top: 0.08in; left: 50%; transform: translateX(-50%); }
+.a4-margin-tag.bottom { bottom: 0.08in; left: 50%; transform: translateX(-50%); }
+.a4-margin-tag.left   { left: 0.08in; top: 50%; transform: translateY(-50%) rotate(-90deg); transform-origin: center; }
+.a4-margin-tag.right  { right: 0.08in; top: 50%; transform: translateY(-50%) rotate(90deg);  transform-origin: center; }
+
+/* Content (cv-shell) lives inside the shared stage. In preview mode, the stage is
+   8.27in wide. Card 0 is placed with its TOP at -0.4in (relative to stage top),
+   so the card's dashed inner content border (0.4in inside card) is exactly at
+   stage y=0. Therefore cv-shell content must also start at stage y=0 (so margin-top
+   is 0, NOT 0.4in). Horizontally, card 0 is at x=0, dashed inner starts at x=0.4in,
+   so cv-shell needs margin-left=0.4in + width=7.47in to exactly fit inside the
+   dashed inner rect (and match the PDF content area). */
+.pdf-preview-mode .cv-shell {
+    position: relative !important;
+    z-index: 5 !important;
+    width: 7.47in !important;
+    margin-left: 0.4in !important;
+    margin-top: 0 !important;
+    margin-right: 0 !important;
+}
+
+.cv-shell {
+    /* Normal (non-preview) width kept as is from inline style. */
+    position: relative;
+}
+
+/* Page break + page start indicators (anchored inside cv-shell, relative to it). */
+.pdf-page-break {
+    position: absolute;
+    left: -0.4in;              /* span back into left margin area of the A4 card */
+    right: -0.4in;             /* span into right margin area too */
+    height: 0;
+    border-top: 2.5px dashed #dc2626;
+    z-index: 6;
+    pointer-events: none;
+}
+.pdf-page-break::after {
+    content: attr(data-label);
+    position: absolute;
+    left: 50%;
+    top: -0.6rem;
+    transform: translateX(-50%);
+    font-family: "Inter", system-ui, sans-serif;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #b91c1c;
+    background: white;
+    border: 1px solid #fecaca;
+    padding: 0.1rem 0.65rem;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.pdf-content-end-zone {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 0.4in;            /* the bottom margin buffer (below last content break) */
+    background: repeating-linear-gradient(
+        -45deg,
+        rgba(239,68,68,0.07),
+        rgba(239,68,68,0.07) 6px,
+        rgba(239,68,68,0.01) 6px,
+        rgba(239,68,68,0.01) 12px
+    );
+    border-top: 1px dashed rgba(220,38,38,0.35);
+    border-bottom: 1px dashed rgba(220,38,38,0.35);
+    z-index: 4;
+    pointer-events: none;
+}
